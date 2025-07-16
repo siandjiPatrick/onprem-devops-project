@@ -1,0 +1,13 @@
+#cloud-config
+hostname: vm1
+users:
+  - name: ubuntu
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    groups: users, admin
+    home: /home/ubuntu
+    shell: /bin/bash
+    ssh_authorized_keys:
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCsMMYnVlyZIOfBxzGB49EMxIYNFuR4sNYrAxCkVg02Gxjpq590agQYesmjcKJkjnZPr5kQrQwdZU7XZoGgRY2y//H0Uo9IB7NtcKb6oUjqJzL76pEQ75FSAazKosIJgoFj7YDpoQpgaVmwOUg37QCtlTxUNbFAMmo8sw1FNUCIHeZbfK805LPPys8rRpw5+feX68EkpSx5PTL79BgD7c4MRbaK55kJEZJVgeCUv6yx0692D8os0FDI1oMG3pH080WcMlKQoqF5T/6INNt7pQVsS1m8ix4mifaki1QAZg/MpLmqkm2u+pHeLgFrDYRwahIu2pzhza5/nifkvltsgL4iDWO7Dd/kUHDowoImfgkAa6fPi7AEkid2aKv7UMUYQYQZMipEfhckYuwhpBqh8C+BAXvke3YPckJnmVbS3JbErHTdgmNXNdvnou0acnUxBxIfv6jlE3xEen2FihD9ruCAHSp1tvQhuhO2meo2pPgl7Z/vK/QQi21EBdvrQckwl5M= patrick@patrick-ubuntu-legion
+
+
+
