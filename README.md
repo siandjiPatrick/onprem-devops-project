@@ -2,7 +2,7 @@
 
 
 
-# README – Fehlerbehebung: Permission Denied beim Erstellen einer libvirt-VM mit Terraform auf Ubuntu
+# Fehlerbehebung: Permission Denied beim Erstellen einer libvirt-VM mit Terraform auf Ubuntu
 
 ## Problemstellung
 
