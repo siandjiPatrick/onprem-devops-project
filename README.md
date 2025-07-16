@@ -28,12 +28,14 @@ Dieser Fehler zeigt, dass QEMU nicht auf die `.qcow2`-Datei zugreifen kann, was 
 
 ## Schritt-für-Schritt Lösung
 
-### 1. AppArmor prüfen und temporär in `complain` Modus versetzen
+# 1. AppArmor prüfen und temporär in `complain` Modus versetzen
 
 AppArmor kann den Zugriff blockieren. Um dies zu umgehen:
 
 ```bash
 # Profil herausfinden (Beispiel aus Logs):
+sudo aa-complain /etc/apparmor.d/libvirt/TEMPLATE.qemu
+
 sudo aa-complain /etc/apparmor.d/libvirt-32703299-dd46-4e27-9bb9-c1a22aa0ce34
 
 # AppArmor Dienst neu starten (optional)
