@@ -1,0 +1,32 @@
+ 
+#@@@@@@@@@@@@@@@@@@ VM Declaration @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@qq
+
+Vm_name = "Terraform_default_VM_name"
+VM_memory = 1024
+Vm_vcpu = 1
+ 
+ Vm_network_properties = {
+            type = "virtio"
+            name = "default" 
+    } 
+
+
+ Vm_console_properties =   {
+            type        = "pty"
+            target_type = "serial"
+            target_port = "0"
+    }
+ 
+Vm_graphics_properties =  {
+                type        = "vnc"
+                autoport    = true
+                listen_type = "address"
+        } 
+
+
+#@@@@@@@@@@@@@@@@@@ Disk Value @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+disk_name   = "terraform_default_disk_name"
+disk_pool   = "default"
+disk_source = "https://cloud-images.ubuntu.com/focal/current/focal-server-cloudimg-amd64.img"
+disk_format = "qcow2"
