@@ -1,0 +1,12 @@
+#cloud-config
+hostname: vm1
+ssh_pwauth: true
+users:
+  - name: ubuntu
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    groups: users, admin
+    home: /home/ubuntu
+    shell: /bin/bash
+    lock_passwd: false
+    ssh_pass
+    passwd: $6$Gqijhf2a5YFv.2qi$LfmgOAeWTmQeOdORuX/TCKzcWjNWLLSIx/Vr45qtu8eFFBZQ0L2vYyR8pQGMO7l8wch8N7ZiplibeQlK5dARd/
