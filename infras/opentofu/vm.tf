@@ -1,15 +1,15 @@
 
 resource "libvirt_domain" "vm" {
 
-  for_each = {for env in var.deploy_environment : "env" => env}
+  for_each = local.all_vm_instances_map
 
 
-  name   = "${var.Vm_name}_${each.key}"
+  name   = each.key
   memory = var.VM_memory
   vcpu   = var.Vm_vcpu
 
   disk {
-    volume_id = libvirt_volume.vm_disk["${each.key}"].id
+    volume_id = libvirt_volume.vm_disk[each.key].id
   }
 
   network_interface {

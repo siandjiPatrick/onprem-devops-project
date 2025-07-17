@@ -87,16 +87,9 @@ variable "disk_format" {
 
 }
 
-variable "deploy_environment" {
-  type = object({
-    dev = object({
-      number_vm = number
-    })
-    preprod = object({
-      number_vm = number
-    })
-    prod = object({
-      number_vm = number
-    })
-  })
+variable "Vm_pro_environment" {
+  type = map(object({
+     number_vm = number
+  }
+  ))
 }
