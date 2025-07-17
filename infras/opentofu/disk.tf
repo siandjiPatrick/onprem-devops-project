@@ -1,7 +1,9 @@
 resource "libvirt_volume" "vm_disk" {
-  for_each = {for env in var.deploy_environment : var.deploy_environment.key => env}
+  for_each = local.all_vm_instances_map
 
-  name   = "${var.disk_name}_${each.key}.${var.disk_format}"
+
+
+  name   = "${each.key}.${var.disk_format}"
   pool   = var.disk_pool
   source = var.disk_source
   format = var.disk_format
