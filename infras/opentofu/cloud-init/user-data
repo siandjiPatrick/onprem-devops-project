@@ -1,0 +1,12 @@
+#cloud-config
+#https://cloudinit.readthedocs.io/en/latest/reference/examples.html
+hostname: 
+ssh_pwauth: true
+users:
+  - name: ubuntu
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    groups: users, admin
+    home: /home/ubuntu
+    shell: /bin/bash
+    lock_passwd: false
+    passwd: $6$Gqijhf2a5YFv.2qi$LfmgOAeWTmQeOdORuX/TCKzcWjNWLLSIx/Vr45qtu8eFFBZQ0L2vYyR8pQGMO7l8wch8N7ZiplibeQlK5dARd/
