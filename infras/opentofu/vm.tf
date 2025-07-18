@@ -16,7 +16,7 @@ resource "libvirt_domain" "vm" {
     network_name = var.Vm_network_properties.name
   }
 
-  cloudinit = libvirt_cloudinit_disk.cloudinit.id
+  cloudinit = libvirt_cloudinit_disk.cloudinit[each.key].id
 
   console {
     type        = var.Vm_console_properties.type
