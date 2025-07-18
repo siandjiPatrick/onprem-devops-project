@@ -17,5 +17,12 @@ locals {
   }
 }
 
+locals{
+  env_list = [ for env, config in var.Vm_pro_environment:  env ]
+}
+
+output "env_list"{
+  value = local.env_list
+}
 
 
