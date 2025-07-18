@@ -1,10 +1,10 @@
 
 
-output "Vm_addresse" {
+output "vm_ip_addresse" {
     depends_on = [ libvirt_domain.vm ]
     value = {
-               for k, vm  in libvirt_domain.vm:    
-                        k => vm.network_interface[0].addresses[0]
+               for env, vm  in libvirt_domain.vm:    
+                        env => vm.network_interface[0].addresses[0]
             }
 
     }
