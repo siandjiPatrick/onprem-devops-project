@@ -1,32 +1,107 @@
- 
+
 #@@@@@@@@@@@@@@@@@@ VM Declaration @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@qq
 
-Vm_name = "Terraform_default_VM_name"
+Vm_name   = "Server"
 VM_memory = 1024
-Vm_vcpu = 1
- 
- Vm_network_properties = {
-            type = "virtio"
-            name = "default" 
-    } 
+Vm_vcpu   = 1
+
+Vm_network_properties = {
+  type = "virtio"
+  name = "default"
+}
 
 
- Vm_console_properties =   {
-            type        = "pty"
-            target_type = "serial"
-            target_port = "0"
-    }
- 
-Vm_graphics_properties =  {
-                type        = "vnc"
-                autoport    = true
-                listen_type = "address"
-        } 
+Vm_console_properties = {
+  type        = "pty"
+  target_type = "serial"
+  target_port = "0"
+}
+
+Vm_graphics_properties = {
+  type        = "vnc"
+  autoport    = true
+  listen_type = "address"
+}
 
 
 #@@@@@@@@@@@@@@@@@@ Disk Value @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-disk_name   = "terraform_default_disk_name"
+disk_name   = "disk"
 disk_pool   = "default"
-disk_source = "https://cloud-images.ubuntu.com/focal/current/focal-server-cloudimg-amd64.img"
+disk_source = "ubuntu-focal.img"
 disk_format = "qcow2"
+
+
+#@@@@@@@@@@@@@@@@ Vm cluster
+
+Vm_pro_environment = {
+  dev = {
+    number_vm = 1
+  }
+  preprod = {
+    number_vm = 1
+  }
+  prod = {
+    number_vm = 3
+  }
+}
+
+#@@@@@@@@@@@@@@@ cloud-init 
+
+cloudInit_hostname = "cloudinit_server"
+
+cloudInit_user_password = "$6$lVRqiAwCHdiky0Vp$WdiRM0VToJKGPXSvj1ioRirRBYHB7tJADEzPOfRyG1PfVOiR.lmvzPf4n0W5vFxqONqxpcrtYd0hEAxJuT2xX0"
+
+cloudInit_user_name = "devops"
+
+cloudInit_user_shell = "/bin/bash"
+
+cloudInit_packages = [ 
+                        "python3",
+                        "python3-pip",
+                        "apache2-utils",         # pour `htpasswd`
+                        "vim",
+                        "docker.io",
+                        "eatmydata",
+                        "cockpit",
+                        "cockpit-machines",
+                        "fail2ban",
+                        "ufw",
+                        "htop",
+                        "iftop",
+                        "nmap",
+                        "net-tools",
+                        "curl",
+                        "wget",
+                        "unzip",
+                        "gnupg",
+                        "ca-certificates",
+                        "jq",
+                        "nginx" ]
+
+cloudInit_ssh_authorized_keys = [ "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCsMMYnVlyZIOfBxzGB49EMxIYNFuR4sNYrAxCkVg02Gxjpq590agQYesmjcKJkjnZPr5kQrQwdZU7XZoGgRY2y//H0Uo9IB7NtcKb6oUjqJzL76pEQ75FSAazKosIJgoFj7YDpoQpgaVmwOUg37QCtlTxUNbFAMmo8sw1FNUCIHeZbfK805LPPys8rRpw5+feX68EkpSx5PTL79BgD7c4MRbaK55kJEZJVgeCUv6yx0692D8os0FDI1oMG3pH080WcMlKQoqF5T/6INNt7pQVsS1m8ix4mifaki1QAZg/MpLmqkm2u+pHeLgFrDYRwahIu2pzhza5/nifkvltsgL4iDWO7Dd/kUHDowoImfgkAa6fPi7AEkid2aKv7UMUYQYQZMipEfhckYuwhpBqh8C+BAXvke3YPckJnmVbS3JbErHTdgmNXNdvnou0acnUxBxIfv6jlE3xEen2FihD9ruCAHSp1tvQhuhO2meo2pPgl7Z/vK/QQi21EBdvrQckwl5M= patrick@patrick-ubuntu-legion" ]
+
+cloudInit_runCommand = [  "systemctl enable docker",
+                          "systemctl start docker",
+                          "systemctl enable cockpit.socket",
+                          "systemctl start cockpit.socket",
+                          "ufw allow 22",
+                          "ufw allow 9090",          # cockpit
+                          "ufw allow 80",
+                          "ufw allow 443",
+                          "ufw enable",
+                          "echo 'Install Traefik...'",
+                          "curl -sL https://raw.githubusercontent.com/traefik/traefik/v2.11/docs/content/reference/static-configuration/file.md -o /etc/traefik/traefik.yml",
+                          "mkdir -p /etc/traefik",
+                          "touch /etc/traefik/acme.json",
+                          "chmod 600 /etc/traefik/acme.json",
+                          "docker run -d --name=traefik -p 8081:80 -p 443:443 -p 8080:8080 -v /var/run/docker.sock:/var/run/docker.sock -v /etc/traefik:/etc/traefik traefik:v2.11"
+]
+
+cloudInit_lock_password = false
+
+cloudInit_ssh_passAuthentification = true
+
+cloudInit_user_groups = "users, admin"
+
+
