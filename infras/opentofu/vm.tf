@@ -1,10 +1,10 @@
 
 resource "libvirt_domain" "vm" {
 
-  for_each = local.all_vm_instances_map
+  for_each = local.all_vm_env_map
 
 
-  name   = each.key
+  name   = "${var.Vm_name}-${each.key}"
   memory = var.VM_memory
   vcpu   = var.Vm_vcpu
 
@@ -14,7 +14,6 @@ resource "libvirt_domain" "vm" {
 
   network_interface {
     network_name = var.Vm_network_properties.name
-    #model       = var.Vm_network_properties.model
   }
 
   cloudinit = libvirt_cloudinit_disk.cloudinit.id

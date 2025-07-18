@@ -93,3 +93,58 @@ variable "Vm_pro_environment" {
   }
   ))
 }
+
+
+#@@@@@@@@@@@@@@@@@@@@@ Cloud init Information @@@@@@@@@@@@@@@@@@@@@@@@qqq
+
+variable "cloudInit_hostname" {
+  type = string
+
+}
+
+variable "cloudInit_user_name" {
+  type = string
+
+}
+variable "cloudInit_user_shell" {
+  type = string
+
+}
+variable "cloudInit_user_password" {
+  type = string
+
+}
+
+variable "cloudInit_user_groups" {
+  type = string
+
+}
+
+variable "cloudInit_ssh_authorized_keys" {
+  type = list(string)
+
+}
+
+variable "cloudInit_packages" {
+  type = list(string)
+
+}
+
+
+variable "cloudInit_lock_password" {
+  type = bool
+
+}
+
+variable "cloudInit_ssh_passAuthentification" {
+  type = bool
+
+}
+
+variable "cloudInit_runCommand" {
+  type = list(string)
+
+}
+
+
+

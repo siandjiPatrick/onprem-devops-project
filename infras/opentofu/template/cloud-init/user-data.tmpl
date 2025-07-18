@@ -1,0 +1,41 @@
+#cloud-config
+#https://cloudinit.readthedocs.io/en/latest/reference/examples.html
+
+manage_etc_hosts: true
+package_update: true
+package_upgrade: true
+
+preserve_hostname: false
+hostname: ${hostname}
+fqdn: ${hostname}.devops-infra.local
+
+
+ssh_pwauth: ${ssh_pwauth}
+users: 
+   - name: ${username}
+     sudo: ALL=(ALL) NOPASSWD:ALL
+     groups: ${groups}
+     home: /home/${username}
+     shell: ${shell}
+     lock_passwd: ${lock_passwd}
+     passwd: ${user_password}
+     ssh_authorized_keys: 
+      ${ssh_authorized_keys}
+    
+
+packages: 
+ ${packages_to_install}
+
+runcmd: 
+ ${run_command}
+
+ #cloud-config
+growpart:
+  mode: auto
+  devices: ['/']
+  ignore_growroot_disabled: false
+
+resize_rootfs: true
+
+
+final_message: "VM ${hostname} configurée et prête à l'emploi."
