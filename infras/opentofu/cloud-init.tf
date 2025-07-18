@@ -1,8 +1,13 @@
+
+
+
 data "template_file" "cloudinit"{
+  for_each = local.all_vm_env_map
+
   template = file("${path.module}/template/cloud-init/user-data.tmpl")
 
   vars = {
-    hostname = var.cloudInit_hostname
+    hostname = "${var.Vm_name}-${each.key}"
     ssh_pwauth = var.cloudInit_ssh_passAuthentification
     username = var.cloudInit_user_name
     groups = var.cloudInit_user_groups
@@ -20,7 +25,8 @@ data "template_file" "cloudinit"{
 
 
 resource "libvirt_cloudinit_disk" "cloudinit" {
-  name      = "${var.cloudInit_hostname}-cloudinit.qcow2"
+  for_each = local.all_vm_env_map
+  name      = "${each.key}-cloudinit.qcow2"
   pool      = "default"
-  user_data = data.template_file.cloudinit.rendered
+  user_data = data.template_file.cloudinit[each.key].rendered
 }
