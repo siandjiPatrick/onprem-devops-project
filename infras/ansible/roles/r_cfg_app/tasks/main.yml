@@ -1,2 +1,16 @@
 ---
 # tasks file for r_cfg_app
+
+
+- name: "test ansible"
+  hosts: 
+    
+    - prod-1
+
+  
+  tasks: 
+    - name: install nginx
+      package:
+        name: nginx
+        state: absent
+      
