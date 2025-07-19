@@ -1,0 +1,9 @@
+
+#@@@@@@@@@@@@@@@@@@  Ce code a ete genere par Terraform @@@@@@@@@@@
+
+%{ for env, ip in all_vm_ip_adress ~}
+
+[${env}]
+${ip}
+
+%{ endfor ~}

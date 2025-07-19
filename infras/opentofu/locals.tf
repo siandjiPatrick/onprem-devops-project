@@ -6,10 +6,8 @@ locals {
       }
     ]
   ])
-}
 
-# convert to map
-locals {
+  # convert to map
   all_vm_env_map = {
     for vm in local.all_vm_env_list :
     vm.env_name => vm
@@ -17,12 +15,11 @@ locals {
   }
 }
 
+
+
+
 locals{
   env_list = [ for env, config in var.Vm_pro_environment:  env ]
-}
-
-output "env_list"{
-  value = local.env_list
 }
 
 
