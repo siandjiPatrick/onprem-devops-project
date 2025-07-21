@@ -12,6 +12,10 @@ resource "libvirt_domain" "vm" {
     volume_id = libvirt_volume.vm_disk[each.key].id
   }
 
+   disk {
+    volume_id = libvirt_volume.data_disk[each.key].id
+  }
+
   network_interface {
     network_name = var.Vm_network_properties.name
   }
