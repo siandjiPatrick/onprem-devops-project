@@ -172,3 +172,10 @@ variable "cloudInit_ansible_user_groups" {
   type = string
   
 }
+
+#@@@@@@@@@@@@@@@@@@@@@@@@q terraform Message @@@@@@@@@@@@@@@@@@@@@@@@@@q
+
+variable "info_message" {
+  type = string
+  
+}

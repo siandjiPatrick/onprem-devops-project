@@ -5,8 +5,7 @@ locals {
   all_vm_ip_adresss = [
     for env, vm in libvirt_domain.vm : {
       env_name = env
-      ansible_config       = "${vm.network_interface[0].addresses[0]} ansible_port=${var.ansible_port} ansible_user=${var.cloudInit_ansible_user_name} ansible_ssh_private_key_file=${var.ansible_ssh_private_key_file_path}"
-
+      ansible_config =  try("${vm.network_interface[0].addresses[0]} ansible_port=${var.ansible_port} ansible_user=${var.cloudInit_ansible_user_name} ansible_ssh_private_key_file=${var.ansible_ssh_private_key_file_path}", "${var.info_message}")
     }
   ]
 
