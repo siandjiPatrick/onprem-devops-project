@@ -147,4 +147,28 @@ variable "cloudInit_runCommand" {
 }
 
 
+#@@@@@@@@@@@@@@@@@@@@@@@ Ansible info @@@@@@@@@@@@@@@@@@
 
+variable "ansible_port" {
+  type = number
+  
+}
+
+variable "ansible_ssh_private_key_file_path" {
+  type = string
+  
+}
+
+variable "cloudInit_ansible_user_name" {
+  type = string
+  
+}
+
+variable "cloudInit_ansible_user_password" {
+  type = string  
+}
+
+variable "cloudInit_ansible_user_groups" {
+  type = string
+  
+}
