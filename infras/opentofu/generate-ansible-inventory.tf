@@ -5,7 +5,7 @@ locals {
   all_vm_ip_adresss = [
     for env, vm in libvirt_domain.vm : {
       env_name = env
-      ansible_config =  try("${vm.network_interface[0].addresses[0]} ansible_port=${var.ansible_ssh_port} ansible_user=${var.ansible_ssh_private_key_file_path}" , "${var.info_message}")
+      ansible_config =  try("${vm.network_interface[0].addresses[0]} ansible_port=${var.ansible_ssh_port} ansible_user=${var.vm_config[split("-", env)[0]].user_data_properties.user_name}  ansible_ssh_private_key_file=${var.ansible_ssh_private_key_file_path}" , "${var.info_message}")
     }
   ]
 
@@ -22,12 +22,24 @@ locals {
     ]
   }
 
+  # Liste des k8s masters : prod-1 uniquement
+  k8s_masters = [
+    for env in local.grouped_hosts["prod"] : env
+    if env == "prod-1"
+  ]
 
+  # Liste des k8s workers : tous sauf prod-1
+  k8s_workers = [
+    for env in local.grouped_hosts["prod"] : env
+    if env != "prod-1"
+  ]
 
 
   inventory = templatefile("${path.module}/template/ansible/inventory.tmpl", {
     groups = local.grouped_hosts
     hosts = local.all_vm_ip_adresss
+    k8s_masters  = local.k8s_masters
+    k8s_workers  = local.k8s_workers
 
   
   })

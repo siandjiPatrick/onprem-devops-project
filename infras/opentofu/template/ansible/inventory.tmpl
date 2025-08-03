@@ -5,17 +5,27 @@
 #    Date: 15/07/2025
 #
 
+%{ for host in hosts ~}
 
-%{ for host in  hosts ~}
 [${host.env_name}]
 ${host.ansible_config}
-
 %{ endfor ~}
 
+
 %{ for group, entries in groups ~}
+
 [${group}:children]
 %{ for entry in entries ~}
 ${entry}
 %{ endfor ~}
-
 %{ endfor ~}
+
+[k8s-master:children]
+%{ for entry in k8s_masters ~}
+${entry}
+%{ endfor }
+
+[k8s-workers:children]
+%{ for entry in k8s_workers ~}
+${entry}
+%{ endfor }
