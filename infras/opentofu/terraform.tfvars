@@ -38,8 +38,7 @@ vm_config = {
       runCommand = [
         "localectl set-keymap de",
       "localectl set-x11-keymap de nodeadkeys"]
-      ansible_port = 8081
-      info_message = "willkommen"
+      message = "willkommen"
     }
   },
   #Preprod
@@ -83,8 +82,7 @@ vm_config = {
         "localectl set-x11-keymap de nodeadkeys"
 
       ]
-      ansible_port = 8081
-      info_message = "willkommen preprod-user"
+      message = "willkommen preprod-user"
     }
 
   },
@@ -128,11 +126,11 @@ vm_config = {
         "localectl set-keymap de",
         "localectl set-x11-keymap de nodeadkeys",
       ]
-      ansible_port = 8081
-      info_message = "willkommen prod user"
+      message = "willkommen prod user"
     }
 
   }
 }
 
 
+ansible_ssh_port = 22

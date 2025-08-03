@@ -52,8 +52,7 @@ variable "vm_config" {
       packages = list(string)
 
       runCommand   = list(string)
-      ansible_port = number
-      info_message = string
+      message = string
     })
     }
   ))
@@ -61,5 +60,15 @@ variable "vm_config" {
 
 variable "info_message" {
   type    = string
-  default = "Warten !!! "
+  default = "IP address provisioning in progress... Please run the command >> $tofu apply --auto-approve  << again in about 1 minute to obtain the IP address."
+}
+
+variable "ansible_ssh_port" {
+  type    = number
+  default = 22
+}
+
+variable "ansible_ssh_private_key_file_path" {
+  type    = string
+  default = "~/.ssh/id_rsa"
 }
