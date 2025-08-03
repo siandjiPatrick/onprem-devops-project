@@ -8,7 +8,7 @@ resource "libvirt_cloudinit_disk" "cloudinit" {
   pool     = "default"
 
   user_data = templatefile("${path.module}/template/cloud-init/user-data.tmpl", {
-    hostname   = "${each.key}"
+    hostname   = "${each.value}"
     ssh_pwauth = true
 
     users = [
