@@ -53,9 +53,4 @@ resource "local_file" "ansible_inventories" {
 }
 
 
-output "grouped_hosts" {
-  value = local.grouped_hosts
-}
-
-
 

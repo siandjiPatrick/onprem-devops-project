@@ -9,13 +9,21 @@ output "vm_ip_addresse" {
 
 }
 
-
-
-
 output "env_list" {
   value = local.env_list
 }
-/*
+
+output "grouped_hosts" {
+  value = local.grouped_hosts
+}
+
+output "k8s_masters" {
+  value = local.k8s_masters
+}
+
+output "k8s_workers" {
+  value = local.k8s_workers
+}
 
 output "inventory" {
     value = local.inventory
@@ -25,4 +33,4 @@ output "inventory" {
 output "all_vm_ip_adresss"{
   value = local.all_vm_ip_adresss
 }
-*/
+

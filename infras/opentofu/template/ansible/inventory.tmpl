@@ -20,12 +20,21 @@ ${entry}
 %{ endfor ~}
 %{ endfor ~}
 
-[k8s-masters:children]
+
+[k8s-cluster:children]
+%{ for group, entries in groups ~}
+%{ if group == "prod" ~}
+${group}
+%{ endif ~}
+%{ endfor ~}
+
+
+[k8s-master]
 %{ for entry in k8s_masters ~}
 ${entry}
 %{ endfor }
 
-[k8s-workers:children]
+[k8s-workers]
 %{ for entry in k8s_workers ~}
 ${entry}
 %{ endfor }
