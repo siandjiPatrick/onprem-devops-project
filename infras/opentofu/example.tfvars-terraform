@@ -34,18 +34,18 @@ disk_format = "qcow2"
 
 #@@@@@@@@@@@@@@@@ Vm cluster
 
-Vm_pro_environment = {
+vm_config= {
   dev = {
-    number_vm = 1
+    number_instance = 1
   }
   preprod = {
-    number_vm = 2
+    number_instance = 2
   }
   prod = {
-    number_vm = 3
+    number_instance = 3
   }
   test = {
-    number_vm = 1
+    number_instance = 1
   }
 }
 

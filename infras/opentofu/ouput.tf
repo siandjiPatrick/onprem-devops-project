@@ -9,18 +9,20 @@ output "vm_ip_addresse" {
 
     }
 
-output "inventory" {
-    value = local.inventory
-  
-}
 
 
 
 output "env_list"{
   value = local.env_list
 }
+/*
 
+output "inventory" {
+    value = local.inventory
+  
+}
 
 output "all_vm_ip_adresss"{
   value = local.all_vm_ip_adresss
 }
+*/

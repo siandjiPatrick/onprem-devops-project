@@ -1,36 +1,37 @@
 
 resource "libvirt_domain" "vm" {
 
-  for_each = local.all_vm_env_map
+  for_each = local.vm_envs_map
 
 
-  name   = "${var.Vm_name}-${each.key}"
-  memory = var.VM_memory
-  vcpu   = var.Vm_vcpu
+  name   = format("%s-%s", var.vm_config[split("-", each.key)[0]].name, each.key)
+  memory = var.vm_config[split("-", each.key)[0]].memory
+  vcpu   = var.vm_config[split("-", each.key)[0]].vcpu
+  
 
   disk {
     volume_id = libvirt_volume.vm_disk[each.key].id
   }
 
-   disk {
+  /* disk {
     volume_id = libvirt_volume.data_disk[each.key].id
-  }
+  }*/
 
   network_interface {
-    network_name = var.Vm_network_properties.name
+    network_name = var.vm_config[split("-", each.key)[0]].network_properties.name
   }
 
   cloudinit = libvirt_cloudinit_disk.cloudinit[each.key].id
 
   console {
-    type        = var.Vm_console_properties.type
-    target_type = var.Vm_console_properties.target_type
-    target_port = var.Vm_console_properties.target_port
+    type        = var.vm_config[split("-", each.key)[0]].console_properties.type
+    target_type = var.vm_config[split("-", each.key)[0]].console_properties.target_type
+    target_port = var.vm_config[split("-", each.key)[0]].console_properties.target_port
   }
 
   graphics {
-    type        = var.Vm_graphics_properties.type
-    autoport    = var.Vm_graphics_properties.autoport
-    listen_type = var.Vm_graphics_properties.listen_type
+    type        = var.vm_config[split("-", each.key)[0]].graphics_properties.type
+    autoport    = var.vm_config[split("-", each.key)[0]].graphics_properties.autoport
+    listen_type = var.vm_config[split("-", each.key)[0]].graphics_properties.listen_type
   }
 }

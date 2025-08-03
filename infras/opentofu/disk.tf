@@ -1,22 +1,20 @@
 resource "libvirt_volume" "vm_disk" {
-  for_each = local.all_vm_env_map
+  for_each = local.vm_envs_map
 
-
-
-  name   = "${var.disk_name}-${each.key}.${var.disk_format}"
-  pool   = var.disk_pool
-  source = "${path.module}/../../../images/${var.disk_source}" #qemu-img resize /chemin/vers/ton-disque.qcow2 +10G
-
-  format = var.disk_format
+  name   = format("%s-%s.%s",var.vm_config[split("-", each.key)[0]].disk.name, each.key,var.vm_config[split("-", each.key)[0]].disk.format)
+  pool   = var.vm_config[split("-", each.key)[0]].disk.pool
+  source = var.vm_config[split("-", each.key)[0]].disk.source  #qemu-img resize /chemin/vers/ton-disque.qcow2 +10G
+  format = var.vm_config[split("-", each.key)[0]].disk.format
  
 }
 
+/*
 # Create a second empty disk (data)
 resource "libvirt_volume" "data_disk" {
-  for_each = local.all_vm_env_map
+  for_each = local.vm_envs_map
 
-  name   = "vm-data-${each.key}.${var.disk_format}"
-  pool   = var.disk_pool
+  name   = format("%s-%s.%s", "hdd", each.key,var.vm_config[split("-", each.key)[0]].disk.format)
+  pool   = var.vm_config[split("-", each.key)[0]].disk.pool
   size   = 5 * 1024 * 1024 * 1024  # 5 GiB
-  format = "qcow2"
-}
+  format = var.vm_config[split("-", each.key)[0]].disk.format
+}*/
