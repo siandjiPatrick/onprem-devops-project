@@ -4,7 +4,7 @@ resource "libvirt_domain" "vm" {
   for_each = local.vm_envs_map
 
 
-  name   = format("%s", each.key)
+  name   = format("%s", each.value)
   memory = var.vm_config[split("-", each.key)[0]].memory
   vcpu   = var.vm_config[split("-", each.key)[0]].vcpu
 

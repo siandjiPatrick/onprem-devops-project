@@ -70,5 +70,5 @@ variable "ansible_ssh_port" {
 
 variable "ansible_ssh_private_key_file_path" {
   type    = string
-  default = "~/.ssh/id_rsa"
+  default = "/home/patrick/.ssh/id_rsa"
 }

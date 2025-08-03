@@ -7,14 +7,13 @@
 
 %{ for host in hosts ~}
 
-[${host.env_name}]
-${host.ansible_config}
+${host.env_name} ${host.ansible_config}
 %{ endfor ~}
 
 
 %{ for group, entries in groups ~}
 
-[${group}:children]
+[${group}]
 %{ for entry in entries ~}
 ${entry}
 %{ endfor ~}
