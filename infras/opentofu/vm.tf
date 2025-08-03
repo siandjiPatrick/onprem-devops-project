@@ -4,18 +4,18 @@ resource "libvirt_domain" "vm" {
   for_each = local.vm_envs_map
 
 
-  name   = format("%s-%s", var.vm_config[split("-", each.key)[0]].name, each.key)
+  name   = format("%s", each.key)
   memory = var.vm_config[split("-", each.key)[0]].memory
   vcpu   = var.vm_config[split("-", each.key)[0]].vcpu
-  
+
 
   disk {
     volume_id = libvirt_volume.vm_disk[each.key].id
   }
 
-  /* disk {
+  disk {
     volume_id = libvirt_volume.data_disk[each.key].id
-  }*/
+  }
 
   network_interface {
     network_name = var.vm_config[split("-", each.key)[0]].network_properties.name

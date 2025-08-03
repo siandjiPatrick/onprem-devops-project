@@ -32,8 +32,29 @@ users:
 %{ endif }
 %{ endfor }
 
-package_update: true
-package_upgrade: true
+
+locale: de_DE.UTF-8
+keyboard:
+  layout: de
+  variant: nodeadkeys  # ou "basic"
+  toggle: ctrl_shift
+
+write_files:
+  - path: /etc/vconsole.conf
+    content: |
+      KEYMAP=de
+  - path: /etc/default/keyboard
+    content: |
+      XKBMODEL=pc105
+      XKBLAYOUT=de
+      XKBVARIANT=nodeadkeys
+      XKBOPTIONS=
+
+runcmd:
+  - localectl set-keymap de
+  - localectl set-x11-keymap de nodeadkeys
+package_update: false
+package_upgrade: false
 
 packages:
 %{ for pkg in packages_to_install ~}
