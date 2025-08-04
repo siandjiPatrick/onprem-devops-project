@@ -194,6 +194,12 @@
         dest: /etc/containerd/config.toml
         content: "{{ containerd_config.stdout }}"
 
+    - name: Mettre SystemdCgroup à true dans /etc/containerd/config.toml
+      ansible.builtin.replace:
+        path: /etc/containerd/config.toml
+        regexp: '^(\s*)SystemdCgroup\s*=\s*false'
+        replace: '\1SystemdCgroup = true'
+
     - name: Restart containerd
       ansible.builtin.systemd:
         name: containerd
@@ -220,6 +226,9 @@
       ansible.builtin.template:
         src: /home/patrick/my-project/onprem-devops-project/infras/ansible/roles/r_k8s_install/templates/kubeadm-config-containerd.yaml.j2
         dest: /root/kubeadm-config.yaml
+      when: "'k8s-master' in group_names"
+      #when: inventory_hostname == 'k8s-master'
+
 
     - name: Reset Kubernetes (kubeadm reset with criSocket)
       ansible.builtin.shell: kubeadm reset -f --cri-socket /var/run/containerd/containerd.sock
@@ -248,11 +257,15 @@
         value: '1'
         state: present
         reload: yes
-    - name: Ajouter master-node dans /etc/hosts
+    
+    - name: Ajouter master-node dans /etc/hosts avec l'IP locale
+      become: true
       ansible.builtin.lineinfile:
         path: /etc/hosts
-        line: "192.168.56.10 master-node"
+        line: "{{ ansible_default_ipv4.address }} master-node"
         state: present
+        regexp: '.*\s+master-node'
+
 
 
 
@@ -355,11 +368,12 @@
         dest: /root/calico.yaml
       when: "'k8s-master' in group_names"
 
-    # Uncomment if you want to apply Calico directly here
-    #- name: Apply Calico CNI plugin
-    #  ansible.builtin.shell: kubectl apply -f /root/calico.yaml
-    #  when: "'k8s-master' in group_names"
-
+ 
+    - name: Apply Calico CNI plugin
+      ansible.builtin.shell: kubectl apply -f /root/calico.yaml
+      when: "'k8s-master' in group_names"
+      tags:
+        - calico
 
 # ---
 # # tasks file for r_k8s_install
