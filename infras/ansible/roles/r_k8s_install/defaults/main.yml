@@ -1,2 +1,4 @@
 ---
-# defaults file for r_k8s_install
+# defaults file for r_k8s_install  
+pod_network_cidr: "192.168.0.0/16"  # Pod network CIDR for Calico
+kubernetes_version: "v1.32.0"
