@@ -44,9 +44,34 @@
         opts: defaults
         state: present
 
-    
-    
- 
+    - name: Désactiver systemd-resolved
+      ansible.builtin.systemd:
+        name: systemd-resolved
+        state: stopped
+        enabled: no
+      tags:
+        - resolvconf
+
+    - name: Supprimer le lien symbolique /etc/resolv.conf s'il existe
+      ansible.builtin.file:
+        path: /etc/resolv.conf
+        state: absent
+      tags:
+        - resolvconf
+
+    - name: Définir le DNS statique dans /etc/resolv.conf
+      ansible.builtin.copy:
+        dest: /etc/resolv.conf
+        content: |
+          nameserver 8.8.8.8
+          nameserver 1.1.1.1
+        owner: root
+        group: root
+        mode: '0644'
+      tags:
+        - resolvconf
+        
+  
     - name: Add Docker's official GPG key into /etc/aptkeyrings
       ansible.builtin.get_url:
         url: https://download.docker.com/linux/ubuntu/gpg

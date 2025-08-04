@@ -28,10 +28,10 @@ resource "libvirt_cloudinit_disk" "cloudinit" {
   })
 
 
-  meta_data = templatefile("${path.module}/template/cloud-init/meta-data.tmpl", {
-    hostname    = each.value
-    instance_id = each.value
-  })    
+  # meta_data = templatefile("${path.module}/template/cloud-init/meta-data.tmpl", {
+  #   hostname    = each.value
+  #   instance_id = each.value
+  # })    
 
   # network_config = templatefile("${path.module}/template/cloud-init/network-config.tmpl", {
   #   ip_address = "192.168.122.${tonumber(split("-", each.key )) + 20 }"
