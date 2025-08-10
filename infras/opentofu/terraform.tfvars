@@ -114,9 +114,9 @@ vm_config = {
     }
     user_data_properties = {
       hostname                 = "prod-server"
-      user_name                = "prod"
+      user_name                = "k8s"
       user_shell               = "/bin/bash"
-      user_password            = "$6$sKwnWBiWrT7Vdbn9$kgdMAuO1.NSyUveHfA8t0gmJ/HEqBR/bbo1lEoXtI2fX3Zex4IShJysM2dGmBrNCtviLd9GrESG3NPAt.e.zp/"
+      user_password            = "$6$mfbb39Nwe0Kai9ii$sfrT4oory2u9TrbOGs9Aluw55Y.3Pkbc.kOe/7fb3OQOjg01ph8T5MFNk2gexMAI7SmYy7TkRxqGzfF.ZjOrE."
       lock_password            = false
       user_groups              = "users, admin"
       ssh_authorized_keys_path = "/home/patrick/.ssh/id_rsa.pub"
@@ -126,7 +126,7 @@ vm_config = {
         "localectl set-keymap de",
         "localectl set-x11-keymap de nodeadkeys",
       ]
-      message = "willkommen prod user"
+      message = "willkommen k8s user"
     }
 
   }

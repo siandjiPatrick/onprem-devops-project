@@ -18,7 +18,7 @@ resource "libvirt_domain" "vm" {
   }
 
   network_interface {
-    network_name = var.vm_config[split("-", each.key)[0]].network_properties.name
+    network_name = libvirt_network.kube_network.name #var.vm_config[split("-", each.key)[0]].network_properties.name
   }
 
   cloudinit = libvirt_cloudinit_disk.cloudinit[each.key].id
@@ -34,4 +34,10 @@ resource "libvirt_domain" "vm" {
     autoport    = var.vm_config[split("-", each.key)[0]].graphics_properties.autoport
     listen_type = var.vm_config[split("-", each.key)[0]].graphics_properties.listen_type
   }
+
+  #redemare automatically on host reboot
+  # provisioner "local-exec" {
+  #   command = "virsh autostart ${libvirt_domain.vm[each.key].name}"
+  #   #when    = destroy
+  # }
 }
