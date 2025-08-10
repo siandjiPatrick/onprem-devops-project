@@ -7,6 +7,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      KUBECONFIG: ${{ github.workspace }}/kubeconfig
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -18,9 +20,8 @@ jobs:
           sudo mv kubectl /usr/local/bin/
       
       - name: Set up Kubeconfig
-        run: |  
-          echo "${{ secrets.KUBECONFIG }}" > kubeconfig
-          export KUBECONFIG=$(pwd)/kubeconfig
+        run: |
+          echo "${{ secrets.KUBECONFIG }}" > $KUBECONFIG
       
       - name: Deploy to Kubernetes
         run: |
