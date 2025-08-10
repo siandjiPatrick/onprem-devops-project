@@ -23,6 +23,9 @@ jobs:
         run: |
           echo "${{ secrets.KUBECONFIG }}" > $KUBECONFIG
       
+    
+      - name: sleep
+        run: sleep 15      
       - name: Deploy to Kubernetes
         run: |
           kubectl get nodes
