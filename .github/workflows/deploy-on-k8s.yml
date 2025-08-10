@@ -24,4 +24,4 @@ jobs:
       
       - name: Deploy to Kubernetes
         run: |
-          kubectl create deployment my-app --image=nginx
+          kubectl get nodes
