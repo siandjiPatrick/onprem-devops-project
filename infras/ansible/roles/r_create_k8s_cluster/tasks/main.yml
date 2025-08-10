@@ -1,404 +1,404 @@
 
 
 ---
-- name: Install Kubernetes with containerd runtime
-  hosts: k8s-cluster
-  become: true
-  gather_facts: true
+# - name: Install Kubernetes with containerd runtime
+# hosts: k8s-cluster
+# become: true
+# gather_facts: true
 
-  tasks:
+# tasks:
 
-    - name: Ensure partition exists
-      community.general.parted:
-        device: /dev/vdb
-        number: 1
-        state: present
-        part_type: primary
-        fs_type: ext4
+- name: Ensure partition exists
+  community.general.parted:
+    device: /dev/vdb
+    number: 1
+    state: present
+    part_type: primary
+    fs_type: ext4
 
-    - name: Create filesystem on /dev/vdb1
-      community.general.filesystem:
-        fstype: ext4
-        dev: /dev/vdb1
-        force: no
+- name: Create filesystem on /dev/vdb1
+  community.general.filesystem:
+    fstype: ext4
+    dev: /dev/vdb1
+    force: no
 
-    - name: Create mount point /mnt/data
-      ansible.builtin.file:
-        path: /mnt/data
-        state: directory
-        mode: '0755'
+- name: Create mount point /mnt/data
+  ansible.builtin.file:
+    path: /mnt/data
+    state: directory
+    mode: '0755'
 
-    - name: Mount the partition /dev/vdb1 to /mnt/data
-      ansible.posix.mount:
-        path: /mnt/data
-        src: /dev/vdb1
-        fstype: ext4
-        opts: defaults
-        state: mounted
+- name: Mount the partition /dev/vdb1 to /mnt/data
+  ansible.posix.mount:
+    path: /mnt/data
+    src: /dev/vdb1
+    fstype: ext4
+    opts: defaults
+    state: mounted
 
-    - name: Ensure mount is persistent in fstab
-      ansible.posix.mount:
-        path: /mnt/data
-        src: /dev/vdb1
-        fstype: ext4
-        opts: defaults
-        state: present
+- name: Ensure mount is persistent in fstab
+  ansible.posix.mount:
+    path: /mnt/data
+    src: /dev/vdb1
+    fstype: ext4
+    opts: defaults
+    state: present
 
-    - name: Désactiver systemd-resolved
-      ansible.builtin.systemd:
-        name: systemd-resolved
-        state: stopped
-        enabled: no
-      tags:
-        - resolvconf
+- name: Désactiver systemd-resolved
+  ansible.builtin.systemd:
+    name: systemd-resolved
+    state: stopped
+    enabled: no
+  tags:
+    - resolvconf
 
-    - name: Supprimer le lien symbolique /etc/resolv.conf s'il existe
-      ansible.builtin.file:
-        path: /etc/resolv.conf
-        state: absent
-      tags:
-        - resolvconf
+- name: Supprimer le lien symbolique /etc/resolv.conf s'il existe
+  ansible.builtin.file:
+    path: /etc/resolv.conf
+    state: absent
+  tags:
+    - resolvconf
 
-    - name: Définir le DNS statique dans /etc/resolv.conf
-      ansible.builtin.copy:
-        dest: /etc/resolv.conf
-        content: |
-          nameserver 8.8.8.8
-          nameserver 1.1.1.1
-        owner: root
-        group: root
-        mode: '0644'
-      tags:
-        - resolvconf
-        
+- name: Définir le DNS statique dans /etc/resolv.conf
+  ansible.builtin.copy:
+    dest: /etc/resolv.conf
+    content: |
+      nameserver 8.8.8.8
+      nameserver 1.1.1.1
+    owner: root
+    group: root
+    mode: '0644'
+  tags:
+    - resolvconf
   
-    - name: Add Docker's official GPG key into /etc/aptkeyrings
-      ansible.builtin.get_url:
-        url: https://download.docker.com/linux/ubuntu/gpg
-        dest: /etc/apt/keyrings/docker.asc
-        mode: '0644'
-      when: ansible_os_family == 'Debian'
 
-    - name: Create keyrings directory
-      ansible.builtin.file:
-        path: /etc/apt/keyrings
-        state: directory
-        mode: '0755'
+- name: Add Docker's official GPG key into /etc/aptkeyrings
+  ansible.builtin.get_url:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    dest: /etc/apt/keyrings/docker.asc
+    mode: '0644'
+  when: ansible_os_family == 'Debian'
 
-
-    - name: Create keyrings directory
-      ansible.builtin.file:
-        path: /etc/apt/keyrings
-        state: directory
-        mode: '0755'
-
-    - name: Download Kubernetes GPG key
-      ansible.builtin.get_url:
-        url: https://pkgs.k8s.io/core:/stable:/v1.32/deb/Release.key
-        dest: /etc/apt/keyrings/kubernetes-apt-keyring.asc
-        mode: '0644'
-
-    - name: Convert GPG key to binary format (dearmor)
-      ansible.builtin.command: >
-        gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg /etc/apt/keyrings/kubernetes-apt-keyring.asc
-      args:
-        creates: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-
-    - name: Add Kubernetes APT repository
-      ansible.builtin.copy:
-        dest: /etc/apt/sources.list.d/kubernetes.list
-        content: |
-          deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.32/deb/ /
-        mode: '0644'
-
-    - name: Update apt cache
-      ansible.builtin.apt:
-        update_cache: yes
-
-    - name: Remove Docker and related packages if present
-      ansible.builtin.apt:
-        name:
-          - docker.io
-          - docker-compose
-          - docker-compose-v2
-          - docker-doc
-          - podman-docker
-          - cri-dockerd
-          - containerd
-          - runc
-        state: absent
-      ignore_errors: yes
-
-    
-    - name: Ensure cri-dockerd is NOT installed
-      apt:
-        name: cri-dockerd
-        state: absent
-
-    - name: Install dependencies for containerd and Kubernetes
-      ansible.builtin.apt:
-        name:
-          - apt-transport-https
-          - ca-certificates
-          - curl
-          - software-properties-common
-          - gnupg
-          - lsb-release
-        state: present
-        update_cache: yes
-   
-    
- 
-    # - name: Download Kubernetes GPG key raw file
-    #   ansible.builtin.get_url:
-    #     url: https://pkgs.k8s.io/core:/stable:/v1.32/deb/Release.key
-    #     dest: /etc/apt/keyrings/kubernetes-apt-key.asc
-    #     mode: '0644'
-
-    # - name: Add the Kubernetes package repository to the system's package sources.
-    #   ansible.builtin.shell: 
-    #     cmd: echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.32/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
-    #   when: ansible_os_family == 'Debian' 
- 
-    - name: Add Docker's official GPG key into /etc/aptkeyrings
-      ansible.builtin.get_url:
-        url: https://download.docker.com/linux/ubuntu/gpg
-        dest: /etc/apt/keyrings/docker.asc
-        mode: '0644'
-      when: ansible_os_family == 'Debian'
-   
-    
-    - name: Add Docker repository to APT sources
-      ansible.builtin.shell: |
-        echo \
-        "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
-        $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
-        sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-      when: ansible_os_family == 'Debian'
-
-    # - name: Update apt cache
-    #   ansible.builtin.apt:
-    #     update_cache: yes
-
-    - name: Install containerd, kubelet, kubeadm and kubectl
-      ansible.builtin.apt:
-        name:
-          - containerd.io
-          - kubelet
-          - kubeadm
-          - kubectl
-        state: present
-        update_cache: yes
-
-    
-    - name: Hold Kubernetes packages
-      apt:
-        name: "{{ item }}"
-        state: present
-        update_cache: no
-        allow_downgrade: yes
-        force: yes
-        autoremove: no
-        purge: no
-      loop:
-        - kubelet
-        - kubeadm
-        - kubectl
-
-    - name: Create containerd config directory
-      ansible.builtin.file:
-        path: /etc/containerd
-        state: directory
-
-    - name: Generate default containerd config
-      ansible.builtin.command: containerd config default
-      register: containerd_config
-
-    - name: Write containerd config to /etc/containerd/config.toml
-      ansible.builtin.copy:
-        dest: /etc/containerd/config.toml
-        content: "{{ containerd_config.stdout }}"
-
-    - name: Mettre SystemdCgroup à true dans /etc/containerd/config.toml
-      ansible.builtin.replace:
-        path: /etc/containerd/config.toml
-        regexp: '^(\s*)SystemdCgroup\s*=\s*false'
-        replace: '\1SystemdCgroup = true'
-
-    - name: Restart containerd
-      ansible.builtin.systemd:
-        name: containerd
-        enabled: yes
-        state: restarted
-
-    - name: Disable swap (required for Kubernetes)
-      ansible.builtin.command: swapoff -a
-      when: ansible_swaptotal_mb > 0
-
-    - name: Comment out swap in fstab to disable on reboot
-      ansible.builtin.replace:
-        path: /etc/fstab
-        regexp: '^([^#].*swap.*)$'
-        replace: '# \1'
-
-    - name: Enable and start kubelet
-      ansible.builtin.systemd:
-        name: kubelet
-        enabled: yes
-        state: started
-
-    - name: Write kubeadm config file (adapt your template path)
-      ansible.builtin.template:
-        src: /home/patrick/my-project/onprem-devops-project/infras/ansible/roles/r_k8s_install/templates/kubeadm-config-containerd.yaml.j2
-        dest: /root/kubeadm-config.yaml
-      when: "'k8s-master' in group_names"
-      #when: inventory_hostname == 'k8s-master'
+- name: Create keyrings directory
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
 
 
-    - name: Reset Kubernetes (kubeadm reset with criSocket)
-      ansible.builtin.shell: kubeadm reset -f --cri-socket /var/run/containerd/containerd.sock
-      ignore_errors: true
+- name: Create keyrings directory
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
 
-    
-    - name: Clean Kubernetes directories
-      ansible.builtin.file:
-        path: "{{ item }}"
-        state: absent
-      loop:
-        - /etc/kubernetes/manifests
-        - /etc/kubernetes/pki
-        - /var/lib/etcd
-        - /var/lib/kubelet/config.yaml
-        - /root/.kube/config
+- name: Download Kubernetes GPG key
+  ansible.builtin.get_url:
+    url: https://pkgs.k8s.io/core:/stable:/v1.32/deb/Release.key
+    dest: /etc/apt/keyrings/kubernetes-apt-keyring.asc
+    mode: '0644'
 
-    - name: Stop kubelet
-      ansible.builtin.systemd:
-        name: kubelet
-        state: stopped
+- name: Convert GPG key to binary format (dearmor)
+  ansible.builtin.command: >
+    gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg /etc/apt/keyrings/kubernetes-apt-keyring.asc
+  args:
+    creates: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 
-    - name: Activer l'IP forwarding requis pour Kubernetes
-      ansible.posix.sysctl:
-        name: net.ipv4.ip_forward
-        value: '1'
-        state: present
-        reload: yes
-    
-    - name: Ajouter master-node dans /etc/hosts avec l'IP locale
-      become: true
-      ansible.builtin.lineinfile:
-        path: /etc/hosts
-        line: "{{ ansible_default_ipv4.address }} master-node"
-        state: present
-        regexp: '.*\s+master-node'
+- name: Add Kubernetes APT repository
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/kubernetes.list
+    content: |
+      deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.32/deb/ /
+    mode: '0644'
+
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: yes
+
+- name: Remove Docker and related packages if present
+  ansible.builtin.apt:
+    name:
+      - docker.io
+      - docker-compose
+      - docker-compose-v2
+      - docker-doc
+      - podman-docker
+      - cri-dockerd
+      - containerd
+      - runc
+    state: absent
+  ignore_errors: yes
+
+
+- name: Ensure cri-dockerd is NOT installed
+  apt:
+    name: cri-dockerd
+    state: absent
+
+- name: Install dependencies for containerd and Kubernetes
+  ansible.builtin.apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - software-properties-common
+      - gnupg
+      - lsb-release
+    state: present
+    update_cache: yes
 
 
 
+# - name: Download Kubernetes GPG key raw file
+#   ansible.builtin.get_url:
+#     url: https://pkgs.k8s.io/core:/stable:/v1.32/deb/Release.key
+#     dest: /etc/apt/keyrings/kubernetes-apt-key.asc
+#     mode: '0644'
 
-    - name: Initialize Kubernetes master with kubeadm
-      ansible.builtin.shell: kubeadm init --config /root/kubeadm-config.yaml
-      when: "'k8s-master' in group_names"
-      register: kubeadm_init_output
-      ignore_errors: yes
+# - name: Add the Kubernetes package repository to the system's package sources.
+#   ansible.builtin.shell: 
+#     cmd: echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.32/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+#   when: ansible_os_family == 'Debian' 
 
-    - name: Display kubeadm init output
-      ansible.builtin.debug:
-        var: kubeadm_init_output.stdout_lines
-      when: kubeadm_init_output is defined
-
-    # Sur le master uniquement : extraire la ligne "kubeadm join" + la suivante (hash)
-    - name: Extract kubeadm join command from output
-      set_fact:
-        kubeadm_join_lines: >-
-          {{
-            kubeadm_init_output.stdout_lines
-            | select('search', '^kubeadm join')
-            | list
-            + (kubeadm_init_output.stdout_lines
-                | select('search', '--discovery-token-ca-cert-hash')
-                | list)
-          }}
-      when:
-        - "'k8s-master' in group_names"
-        - kubeadm_init_output is defined
-
-    # Nettoyer la commande join : enlever les antislashs, tabs, etc.
-    - name: Clean kubeadm join command
-      set_fact:
-        kubeadm_join_command_raw: "{{ kubeadm_join_lines | join(' ') | regex_replace('\\\\', '') | regex_replace('\\s+', ' ') | trim }}"
-      when:
-        - "'k8s-master' in group_names"
-        - kubeadm_join_lines is defined
-
-    # Affiche la commande join pour vérification
-    - name: Debug cleaned join command
-      debug:
-        var: kubeadm_join_command_raw
-      when: "'k8s-master' in group_names"
-
-    # Propager cette variable aux workers depuis le master
-    - name: Set final join command on workers
-      set_fact:
-        kubeadm_join_command_final: "{{ hostvars[groups['k8s-master'][0]].kubeadm_join_command_raw }}"
-      when: inventory_hostname in groups['k8s-workers']
-
-    # Rejoindre le cluster avec la bonne commande
-    - name: Join the node to the Kubernetes cluster
-      shell: "{{ kubeadm_join_command_final }} --v=5"
-      when: inventory_hostname in groups['k8s-workers']
-
-    # Uncomment if you want to extract the join command from kubeadm output
-    
-    # - name: Extract kubeadm join command line (if present)
-    #   ansible.builtin.set_fact:
-    #     kubeadm_join_command: >-
-    #       {{ 
-    #         (kubeadm_init_output.stdout_lines | select('search', '^kubeadm join') | list | first | default('')) 
-    #         + ' ' + 
-    #         (kubeadm_init_output.stdout_lines | select('search', '--discovery-token-ca-cert-hash') | list | first | default('')) 
-    #       }}
-    #   when:
-    #     - inventory_hostname in groups['k8s-master']
-    #     - kubeadm_init_output is defined
-    #     - kubeadm_init_output.stdout_lines is defined
+- name: Add Docker's official GPG key into /etc/aptkeyrings
+  ansible.builtin.get_url:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    dest: /etc/apt/keyrings/docker.asc
+    mode: '0644'
+  when: ansible_os_family == 'Debian'
 
 
-    
-    # - name: Set join command fact
-    #   ansible.builtin.set_fact:
-    #     kubeadm_join_command: "{{ kubeadm_join_cmd.stdout }}"
-    #   when: "'k8s-master' in group_names and kubeadm_join_cmd is defined"
+- name: Add Docker repository to APT sources
+  ansible.builtin.shell: |
+    echo \
+    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+    $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
+    sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+  when: ansible_os_family == 'Debian'
 
-    # - name: Join the node to the Kubernetes cluster
-    #   ansible.builtin.shell: "{{ hostvars[groups['k8s-master'][0]].kubeadm_join_command }} --v=5"
-    #   when: inventory_hostname in groups['k8s-workers']
+# - name: Update apt cache
+#   ansible.builtin.apt:
+#     update_cache: yes
+
+- name: Install containerd, kubelet, kubeadm and kubectl
+  ansible.builtin.apt:
+    name:
+      - containerd.io
+      - kubelet
+      - kubeadm
+      - kubectl
+    state: present
+    update_cache: yes
 
 
-    - name: Setup kubeconfig for root
-      ansible.builtin.shell: |
-        mkdir -p /root/.kube
-        cp /etc/kubernetes/admin.conf /root/.kube/config
-        chown root:root /root/.kube/config
-      when: "'k8s-master' in group_names"
+- name: Hold Kubernetes packages
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: no
+    allow_downgrade: yes
+    force: yes
+    autoremove: no
+    purge: no
+  loop:
+    - kubelet
+    - kubeadm
+    - kubectl
 
-    - name: Setup kubeconfig for regular user
-      ansible.builtin.shell: |
-        mkdir -p /home/{{ ansible_user }}/.kube
-        cp /etc/kubernetes/admin.conf /home/{{ ansible_user }}/.kube/config
-        chown {{ ansible_user }}:{{ ansible_user }} /home/{{ ansible_user }}/.kube/config
-      when: "'k8s-master' in group_names"
+- name: Create containerd config directory
+  ansible.builtin.file:
+    path: /etc/containerd
+    state: directory
 
-    - name: Download Calico CNI manifest
-      ansible.builtin.get_url:
-        url: https://raw.githubusercontent.com/projectcalico/calico/v3.27.0/manifests/calico.yaml
-        dest: /root/calico.yaml
-      when: "'k8s-master' in group_names"
+- name: Generate default containerd config
+  ansible.builtin.command: containerd config default
+  register: containerd_config
 
- 
-    - name: Apply Calico CNI plugin
-      ansible.builtin.shell: kubectl apply -f /root/calico.yaml
-      when: "'k8s-master' in group_names"
-      tags:
-        - calico
+- name: Write containerd config to /etc/containerd/config.toml
+  ansible.builtin.copy:
+    dest: /etc/containerd/config.toml
+    content: "{{ containerd_config.stdout }}"
+
+- name: Mettre SystemdCgroup à true dans /etc/containerd/config.toml
+  ansible.builtin.replace:
+    path: /etc/containerd/config.toml
+    regexp: '^(\s*)SystemdCgroup\s*=\s*false'
+    replace: '\1SystemdCgroup = true'
+
+- name: Restart containerd
+  ansible.builtin.systemd:
+    name: containerd
+    enabled: yes
+    state: restarted
+
+- name: Disable swap (required for Kubernetes)
+  ansible.builtin.command: swapoff -a
+  when: ansible_swaptotal_mb > 0
+
+- name: Comment out swap in fstab to disable on reboot
+  ansible.builtin.replace:
+    path: /etc/fstab
+    regexp: '^([^#].*swap.*)$'
+    replace: '# \1'
+
+- name: Enable and start kubelet
+  ansible.builtin.systemd:
+    name: kubelet
+    enabled: yes
+    state: started
+
+- name: Write kubeadm config file (adapt your template path)
+  ansible.builtin.template:
+    src: templates/kubeadm-config-containerd.yaml.j2
+    dest: /root/kubeadm-config.yaml
+  when: "'k8s-master' in group_names"
+  #when: inventory_hostname == 'k8s-master'
+
+
+- name: Reset Kubernetes (kubeadm reset with criSocket)
+  ansible.builtin.shell: kubeadm reset -f --cri-socket /var/run/containerd/containerd.sock
+  ignore_errors: true
+
+
+- name: Clean Kubernetes directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/kubernetes/manifests
+    - /etc/kubernetes/pki
+    - /var/lib/etcd
+    - /var/lib/kubelet/config.yaml
+    - /root/.kube/config
+
+- name: Stop kubelet
+  ansible.builtin.systemd:
+    name: kubelet
+    state: stopped
+
+- name: Activer l'IP forwarding requis pour Kubernetes
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    state: present
+    reload: yes
+
+- name: Ajouter master-node dans /etc/hosts avec l'IP locale
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    line: "{{ ansible_default_ipv4.address }} master-node"
+    state: present
+    regexp: '.*\s+master-node'
+
+
+
+
+- name: Initialize Kubernetes master with kubeadm
+  ansible.builtin.shell: kubeadm init --config /root/kubeadm-config.yaml
+  when: "'k8s-master' in group_names"
+  register: kubeadm_init_output
+  ignore_errors: yes
+
+- name: Display kubeadm init output
+  ansible.builtin.debug:
+    var: kubeadm_init_output.stdout_lines
+  when: kubeadm_init_output is defined
+
+# Sur le master uniquement : extraire la ligne "kubeadm join" + la suivante (hash)
+- name: Extract kubeadm join command from output
+  set_fact:
+    kubeadm_join_lines: >-
+      {{
+        kubeadm_init_output.stdout_lines
+        | select('search', '^kubeadm join')
+        | list
+        + (kubeadm_init_output.stdout_lines
+            | select('search', '--discovery-token-ca-cert-hash')
+            | list)
+      }}
+  when:
+    - "'k8s-master' in group_names"
+    - kubeadm_init_output is defined
+
+# Nettoyer la commande join : enlever les antislashs, tabs, etc.
+- name: Clean kubeadm join command
+  set_fact:
+    kubeadm_join_command_raw: "{{ kubeadm_join_lines | join(' ') | regex_replace('\\\\', '') | regex_replace('\\s+', ' ') | trim }}"
+  when:
+    - "'k8s-master' in group_names"
+    - kubeadm_join_lines is defined
+
+# Affiche la commande join pour vérification
+- name: Debug cleaned join command
+  debug:
+    var: kubeadm_join_command_raw
+  when: "'k8s-master' in group_names"
+
+# Propager cette variable aux workers depuis le master
+- name: Set final join command on workers
+  set_fact:
+    kubeadm_join_command_final: "{{ hostvars[groups['k8s-master'][0]].kubeadm_join_command_raw }}"
+  when: inventory_hostname in groups['k8s-workers']
+
+# Rejoindre le cluster avec la bonne commande
+- name: Join the node to the Kubernetes cluster
+  shell: "{{ kubeadm_join_command_final }} --v=5"
+  when: inventory_hostname in groups['k8s-workers']
+
+# Uncomment if you want to extract the join command from kubeadm output
+
+# - name: Extract kubeadm join command line (if present)
+#   ansible.builtin.set_fact:
+#     kubeadm_join_command: >-
+#       {{ 
+#         (kubeadm_init_output.stdout_lines | select('search', '^kubeadm join') | list | first | default('')) 
+#         + ' ' + 
+#         (kubeadm_init_output.stdout_lines | select('search', '--discovery-token-ca-cert-hash') | list | first | default('')) 
+#       }}
+#   when:
+#     - inventory_hostname in groups['k8s-master']
+#     - kubeadm_init_output is defined
+#     - kubeadm_init_output.stdout_lines is defined
+
+
+
+# - name: Set join command fact
+#   ansible.builtin.set_fact:
+#     kubeadm_join_command: "{{ kubeadm_join_cmd.stdout }}"
+#   when: "'k8s-master' in group_names and kubeadm_join_cmd is defined"
+
+# - name: Join the node to the Kubernetes cluster
+#   ansible.builtin.shell: "{{ hostvars[groups['k8s-master'][0]].kubeadm_join_command }} --v=5"
+#   when: inventory_hostname in groups['k8s-workers']
+
+
+- name: Setup kubeconfig for root
+  ansible.builtin.shell: |
+    mkdir -p /root/.kube
+    cp /etc/kubernetes/admin.conf /root/.kube/config
+    chown root:root /root/.kube/config
+  when: "'k8s-master' in group_names"
+
+- name: Setup kubeconfig for regular user
+  ansible.builtin.shell: |
+    mkdir -p /home/{{ ansible_user }}/.kube
+    cp /etc/kubernetes/admin.conf /home/{{ ansible_user }}/.kube/config
+    chown {{ ansible_user }}:{{ ansible_user }} /home/{{ ansible_user }}/.kube/config
+  when: "'k8s-master' in group_names"
+
+- name: Download Calico CNI manifest
+  ansible.builtin.get_url:
+    url: https://raw.githubusercontent.com/projectcalico/calico/v3.27.0/manifests/calico.yaml
+    dest: /root/calico.yaml
+  when: "'k8s-master' in group_names"
+
+
+- name: Apply Calico CNI plugin
+  ansible.builtin.shell: kubectl apply -f /root/calico.yaml
+  when: "'k8s-master' in group_names"
+  tags:
+  - calico
 
 # ---
 # # tasks file for r_k8s_install
@@ -407,8 +407,8 @@
 #   become: true
 #   gather_facts: true
 #   tasks:
-     
-   
+  
+
 #     - name: Ensure partition exists
 #       community.general.parted:
 #         device: /dev/vdb
@@ -496,7 +496,7 @@
 #         state: present
 
 
-    
+
 
 #     - name: create directory to store docker gpg key
 #       become: true
@@ -505,7 +505,7 @@
 #         state: directory
 #         mode: '0755'    
 #       when: ansible_os_family == 'Debian'    
-    
+
 #     # docker
 #     - name: Add Docker's official GPG key into /etc/aptkeyrings
 #       ansible.builtin.get_url:
@@ -513,7 +513,7 @@
 #         dest: /etc/apt/keyrings/docker.asc
 #         mode: '0644'
 #       when: ansible_os_family == 'Debian'
-    
+
 #     # k8s
 #     - name: Download Kubernetes GPG key raw file
 #       ansible.builtin.get_url:
@@ -541,13 +541,13 @@
 #         $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
 #         sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 #       when: ansible_os_family == 'Debian'
-    
+
 #     # k8s
 #     - name: Add the Kubernetes package repository to the system's package sources.
 #       ansible.builtin.shell: 
 #         cmd: echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.32/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
 #       when: ansible_os_family == 'Debian' 
-    
+
 #     - name: Update apt cache
 #       ansible.builtin.apt:
 #         update_cache: yes
@@ -567,7 +567,7 @@
 #           - kubeadm
 #         state: present
 #         update_cache: yes
-    
+
 #     - name: Hold Kubernetes packages
 #       apt:
 #         name: "{{ item }}"
@@ -582,7 +582,7 @@
 #         - kubeadm
 #         - kubectl
 
-     
+  
 #     - name: Ensure Docker service is enabled and started  
 #       ansible.builtin.systemd:
 #         name: docker
@@ -735,7 +735,7 @@
 #         groups: docker
 #         append: yes
 
-    
+
 #     - name: Restart cri-dockerd to ensure it's connected to Docker
 #       ansible.builtin.systemd:
 #         name: cri-docker.service
@@ -753,12 +753,12 @@
 #       template:
 #         src: /home/patrick/my-project/onprem-devops-project/infras/ansible/roles/r_k8s_install/templates/kubeadm-config.yaml.j2
 #         dest: /root/kubeadm-config.yaml
-    
+
 #     - name: Download Calico CNI manifest
 #       get_url:
 #         url: https://raw.githubusercontent.com/projectcalico/calico/v3.27.0/manifests/calico.yaml
 #         dest: /root/calico.yaml
- 
+
 # # - name: Apply Calico CNI
 # #   shell: kubectl apply -f /root/calico.yaml
 # #   when: inventory_hostname in groups['k8s-master']
@@ -769,7 +769,7 @@
 #         timeout: 30
 #       when: inventory_hostname in groups['k8s-master']
 
-    
+
 #     - name: Wait for cri-docker.service to become active (reliable check)
 #       ansible.builtin.systemd:
 #         name: cri-docker
@@ -783,13 +783,13 @@
 
 
 
-    
+
 #     - name: Run kubeadm init
 #       become: true
 #       shell: kubeadm init --config /root/kubeadm-config.yaml
 #       register: kubeadm_init_output
 #       when: inventory_hostname in groups['k8s-master']
-    
+
 #     - name: Debug kubeadm init output
 #       ansible.builtin.debug:
 #         msg: "Kubeadm init output: {{ kubeadm_init_output.stdout_lines }}"
@@ -809,7 +809,7 @@
 #         cp /etc/kubernetes/admin.conf /home/{{ ansible_user }}/.kube/config
 #         chown vagrant:vagrant /home/{{ ansible_user }}/.kube/config
 #       when: inventory_hostname in groups['k8s-master']
-    
+
 # # - name: Join worker nodes to the cluster
 # #   shell: |
 # #     kubeadm join --token {{ kubeadm_init_output.stdout_lines[0].split()[1] }} \
@@ -817,4 +817,3 @@
 # #     --discovery-token-ca-cert-hash sha256:{{ kubeadm_init_output.stdout_lines[0].split()[2] }}
 # #   when: inventory_hostname in groups['k8s-worker']
 
-   

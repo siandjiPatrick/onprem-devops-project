@@ -1,0 +1,48 @@
+---
+# tasks file for r_create_k8s_cluster_cleanup
+
+- name: Stop kubelet
+  ansible.builtin.systemd:
+    name: kubelet
+    state: stopped
+  ignore_errors: yes
+
+- name: Remove Docker and related packages if present
+  ansible.builtin.apt:
+    name:
+      - docker.io
+      - docker-compose
+      - docker-compose-v2
+      - docker-doc
+      - podman-docker
+      - cri-dockerd
+      - containerd
+      - runc
+    state: absent
+  ignore_errors: yes
+
+
+- name: Ensure cri-dockerd is NOT installed
+  apt:
+    name: cri-dockerd
+    state: absent
+
+- name: Reset Kubernetes (kubeadm reset with criSocket)
+  ansible.builtin.shell: kubeadm reset -f --cri-socket /var/run/containerd/containerd.sock
+  ignore_errors: true
+
+
+- name: Clean Kubernetes directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/kubernetes/manifests
+    - /etc/kubernetes/pki
+    - /var/lib/etcd
+    - /var/lib/kubelet/config.yaml
+    - /root/.kube/config
+
+
+
+  
