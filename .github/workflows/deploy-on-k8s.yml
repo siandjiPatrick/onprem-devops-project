@@ -20,14 +20,10 @@ jobs:
           chmod +x kubectl
           sudo mv kubectl /usr/local/bin/
 
-      - name: Decode kubeconfig
-        run: |
-          echo "${{ secrets.KUBECONFIG }}" | base64 -d > kubeconfig
-          echo "✅ kubeconfig decoded"
-          cat kubeconfig
 
       - name: Test Kubernetes connection
         run: |
-          kubectl --kubeconfig=kubeconfig config view
-          kubectl --kubeconfig=kubeconfig get nodes
-          kubectl --kubeconfig=kubeconfig cluster-info
+          ssh -L 6443:localhost:6443 k8s@10.17.3.6 "kubectl get pods --all-namespaces; 
+          kubectl --kubeconfig=kubeconfig config view;
+          kubectl --kubeconfig=kubeconfig get nodes;
+          kubectl --kubeconfig=kubeconfig cluster-info"
