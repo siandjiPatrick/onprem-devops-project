@@ -31,6 +31,8 @@ jobs:
           kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}'
           kubectl config view --minify -o jsonpath='{.users[0]}'
           curl -k https://k8s.siandji.com/version
+          kubectl auth can-i list nodes --as=kubernetes-admin
+
 
 
 
