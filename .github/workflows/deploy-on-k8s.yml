@@ -1,30 +1,33 @@
-name: deploy-on-k8s
+name: Deploy nginx Pod via SSH Tunnel
 
 on:
   push:
     branches:
       - main
-  workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
-      - name: Install kubectl
+      - name: Setup SSH key
         run: |
-          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-          chmod +x kubectl
-          sudo mv kubectl /usr/local/bin/
+          mkdir -p ~/.ssh
+          echo "${{ secrets.keyrsa }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
 
+      - name: Add remote host to known_hosts
+        run: ssh-keyscan -H 10.17.3.6 >> ~/.ssh/known_hosts
 
-      - name: Test Kubernetes connection
+      - name: Start SSH tunnel
         run: |
-          echo "Testing Kubernetes connection..."
-          echo "${{ secrets.KEYRSA }}" > id_rsa
-          chmod 600 id_rsa
-          ssh -o StrictHostKeyChecking=no -i id_rsa -L 6443:localhost:6443 k8s@10.17.3.6 "kubectl get nodes"
-          "
+          ssh -o StrictHostKeyChecking=no -N -L 6443:10.17.3.6:6443 k8s@10.17.3.6 &
+          sleep 5
+
+      - name: Deploy nginx pod
+        run: |
+          kubectl --server=https://localhost:6443 --insecure-skip-tls-verify run nginx-pod --image=nginx
+          kubectl --server=https://localhost:6443 --insecure-skip-tls-verify get pods
