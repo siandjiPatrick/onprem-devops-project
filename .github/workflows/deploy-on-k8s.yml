@@ -29,7 +29,8 @@ jobs:
           kubectl config get-users
           kubectl config get-contexts
           kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}'
-          kubectl --insecure-skip-tls-verify=true get nodes
+          kubectl config view --minify -o jsonpath='{.users[0]}'
+
 
 
 
