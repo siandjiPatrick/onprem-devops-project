@@ -26,7 +26,5 @@ jobs:
           echo "Testing Kubernetes connection..."
           echo {{ SECRETS.KEYRSA }} > id_rsa
           chmod 600 id_rsa
-          ssh -o StrictHostKeyChecking=no -i id_rsa -L 6443:localhost:6443 k8s@10.17.3.6 "kubectl get pods --all-namespaces; 
-          kubectl --kubeconfig=kubeconfig config view;
-          kubectl --kubeconfig=kubeconfig get nodes;
-          kubectl --kubeconfig=kubeconfig cluster-info"
+          ssh -o StrictHostKeyChecking=no -i id_rsa -L 6443:localhost:6443 k8s@10.17.3.6 "kubectl get nodes"
+          "
