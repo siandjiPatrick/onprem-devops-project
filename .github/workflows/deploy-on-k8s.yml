@@ -24,7 +24,7 @@ jobs:
 
       - name: Decode and set kubeconfig
         run: |
-          echo "${{ secrets.KUBECONFIG_B64 }}" | base64 -d > $KUBECONFIG
+          echo "${{ secrets.KUBECONFIG }}" | base64 -d > $KUBECONFIG
           echo "✅ Kubeconfig decoded"
           kubectl config view --kubeconfig=$KUBECONFIG
 
