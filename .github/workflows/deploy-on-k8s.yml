@@ -1,4 +1,5 @@
 name: deploy-on-k8s
+
 on:
   push:
     branches:
@@ -8,8 +9,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    env:
-      KUBECONFIG: ${{ github.workspace }}/kubeconfig
 
     steps:
       - name: Checkout code
@@ -20,14 +19,20 @@ jobs:
           curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
           chmod +x kubectl
           sudo mv kubectl /usr/local/bin/
-      
-      - name: Set up kubeconfig
+
+      - name: Debug network access to k8s.siandji.com
         run: |
-          printf "%s" "${{ secrets.KUBECONFIG }}" > "$KUBECONFIG"
-          chmod 600 "$KUBECONFIG"
+          nslookup k8s.siandji.com
+          nc -vz k8s.siandji.com 443
+          curl -k https://k8s.siandji.com:443/version
 
-      - name: Test Kubernetes connection
-        run: kubectl cluster-info
+      - name: Set up Kubeconfig
+        run: |
+          echo "${{ secrets.KUBECONFIG }}" > kubeconfig
+          echo "=== Kubeconfig loaded ==="
+          head -n 20 kubeconfig
+          kubectl config view --kubeconfig=kubeconfig
 
-      - name: Deploy to Kubernetes
-        run: kubectl get nodes
+      - name: Test Kubernetes API
+        run: |
+          kubectl --kubeconfig=kubeconfig get nodes
