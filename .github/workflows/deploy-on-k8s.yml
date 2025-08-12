@@ -27,4 +27,6 @@ jobs:
       - name: Test Kubernetes connection
         run: |
           kubectl config get-users
+          kubectl config get-contexts
+
 
