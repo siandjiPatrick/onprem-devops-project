@@ -22,7 +22,7 @@ jobs:
 
       - name: Decode kubeconfig
         run: |
-          echo "${{ secrets.KUBECONFIG_B64 }}" | base64 -d > kubeconfig
+          echo "${{ secrets.KUBECONFIG }}" | base64 -d > kubeconfig
           echo "✅ kubeconfig decoded"
           cat kubeconfig
 
