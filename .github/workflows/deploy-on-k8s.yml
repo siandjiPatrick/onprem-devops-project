@@ -26,4 +26,5 @@ jobs:
 
       - name: Test Kubernetes connection
         run: |
-          kubectl auth can-i get pods --all-namespaces
+          kkubectl config get-users
+
