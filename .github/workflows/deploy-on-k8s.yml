@@ -19,9 +19,7 @@ jobs:
           echo "${{ secrets.keyrsa }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
-      - name: Add remote host to known_hosts
-        run: ssh-keyscan -H 10.17.3.6 >> ~/.ssh/known_hosts
-
+     
       - name: Start SSH tunnel
         run: |
           ssh -o StrictHostKeyChecking=no -N -L 6443:10.17.3.6:6443 k8s@10.17.3.6 &
