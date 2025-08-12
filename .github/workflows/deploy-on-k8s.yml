@@ -30,7 +30,7 @@ jobs:
           kubectl config get-contexts
           kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}'
           kubectl config view --minify -o jsonpath='{.users[0]}'
-
+          kubectl get nodes
 
 
 
