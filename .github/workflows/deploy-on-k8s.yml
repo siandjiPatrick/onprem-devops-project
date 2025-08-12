@@ -4,25 +4,30 @@ on:
     branches:
       - main
   workflow_dispatch:
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
       KUBECONFIG: ${{ github.workspace }}/kubeconfig
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: install kubectl
+      - name: Install kubectl
         run: |
           curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
           chmod +x kubectl
           sudo mv kubectl /usr/local/bin/
       
-      - name: Set up Kubeconfig
+      - name: Set up kubeconfig
         run: |
-          echo "${{ secrets.KUBECONFIG }}" > $KUBECONFIG
-         
+          printf "%s" "${{ secrets.KUBECONFIG }}" > "$KUBECONFIG"
+          chmod 600 "$KUBECONFIG"
+
+      - name: Test Kubernetes connection
+        run: kubectl cluster-info
+
       - name: Deploy to Kubernetes
-        run: |
-          kubectl get nodes
+        run: kubectl get nodes
