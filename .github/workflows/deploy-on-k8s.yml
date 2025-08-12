@@ -9,6 +9,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      KUBECONFIG: ${{ github.workspace }}/kubeconfig
 
     steps:
       - name: Checkout code
@@ -20,19 +22,13 @@ jobs:
           chmod +x kubectl
           sudo mv kubectl /usr/local/bin/
 
-      - name: Debug network access to k8s.siandji.com
+      - name: Decode and set kubeconfig
         run: |
-          nslookup k8s.siandji.com
-          nc -vz k8s.siandji.com 443
-          curl -k https://k8s.siandji.com:443/version
+          echo "${{ secrets.KUBECONFIG_B64 }}" | base64 -d > $KUBECONFIG
+          echo "✅ Kubeconfig decoded"
+          kubectl config view --kubeconfig=$KUBECONFIG
 
-      - name: Set up Kubeconfig
+      - name: Test Kubernetes connection
         run: |
-          echo "${{ secrets.KUBECONFIG }}" > kubeconfig
-          echo "=== Kubeconfig loaded ==="
-          head -n 20 kubeconfig
-          kubectl config view --kubeconfig=kubeconfig
-
-      - name: Test Kubernetes API
-        run: |
-          kubectl --kubeconfig=kubeconfig get nodes
+          kubectl get nodes
+          kubectl cluster-info
