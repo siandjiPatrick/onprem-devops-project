@@ -26,10 +26,4 @@ jobs:
 
       - name: Test Kubernetes connection
         run: |
-          kubectl cluster-info
-          kubectl get nodes
-
-      - name: Deploy manifests
-        run: |
-          kubectl apply -f k8s/deployment.yaml
-          kubectl apply -f k8s/service.yaml
+          kubectl auth can-i get pods --all-namespaces
