@@ -1,4 +1,4 @@
-name: Deploy to Kubernetes
+name: Deploy nginx Pod via SSH Tunnel
 
 on:
   push:
@@ -11,31 +11,19 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
-      - name: Create kubeconfig from secret
+      - name: Setup SSH key
         run: |
-          mkdir -p ~/.kube
-          echo "${{ secrets.KUBECONFIG_FILE }}" > ~/.kube/config
-          chmod 600 ~/.kube/config
+          mkdir -p ~/.ssh
+          echo "${{ secrets.RSA_key }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
 
-      - name: Install kubectl
+      - name: Start SSH tunnel
         run: |
-          sudo apt-get update
-          sudo apt-get install -y kubectl
+          ssh -o StrictHostKeyChecking=no -N -L 6443:10.17.3.6:6443 k8s@10.17.3.6 &
+          sleep 5
 
-      - name: Test Kubernetes connection
+      - name: Deploy nginx pod
         run: |
-          kubectl config get-users
-          kubectl config get-contexts
-          kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}'
-          kubectl config view --minify -o jsonpath='{.users[0]}'
-          curl -k https://k8s.siandji.com/version
-          kubectl auth can-i list nodes --as=kubernetes-admin
-
-
-
-
-
-
-
+          kubectl --server=https://localhost:6443 --insecure-skip-tls-verify run nginx-pod --image=nginx
