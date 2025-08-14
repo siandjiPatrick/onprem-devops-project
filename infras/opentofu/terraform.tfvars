@@ -1,7 +1,7 @@
 vm_config = {
   #Bacca
   dev = {
-    number_instance = 1
+    number_instance = 0
     name            = "server"
     memory          = 2048
     vcpu            = 2
@@ -43,7 +43,7 @@ vm_config = {
   },
   #Preprod
   preprod = {
-    number_instance = 1
+    number_instance = 0
     name            = "server"
     memory          = 2048
     vcpu            = 2
@@ -90,8 +90,8 @@ vm_config = {
   prod = {
     number_instance = 3
     name            = "server"
-    memory          = 5120
-    vcpu            = 5
+    memory          = 2048
+    vcpu            = 2
     network_properties = {
       type = "virtio"
       name = "default"

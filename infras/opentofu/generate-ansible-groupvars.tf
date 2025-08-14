@@ -13,7 +13,7 @@ locals {
 resource "local_file" "ansible_global_vars" {
   depends_on = [ libvirt_domain.vm ]
   content  = local.group_vars
-  filename = "${path.module}/../ansible/group_vars/all.yaml"
+  filename = "${path.module}/../../config/ansible/group_vars/all.yaml"
 }
 
 

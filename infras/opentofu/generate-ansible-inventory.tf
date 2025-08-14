@@ -35,7 +35,7 @@ locals {
   ]
 
 
-  inventory = templatefile("${path.module}/config/template/ansible/inventory.tmpl", {
+  inventory = templatefile("${path.module}/template/ansible/inventory.tmpl", {
     groups = local.grouped_hosts
     hosts = local.all_vm_ip_adresss
     k8s_masters  = local.k8s_masters
@@ -49,7 +49,7 @@ locals {
 resource "local_file" "ansible_inventories" {
   depends_on = [ libvirt_domain.vm ]
   content  = local.inventory
-  filename = "${path.module}/../config/ansible/inventory.ini"
+  filename = "${path.module}/../../config/ansible/inventory.ini"
 }
 
 

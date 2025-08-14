@@ -33,8 +33,10 @@ jobs:
             --token="$KUBE_TOKEN" \
             --insecure-skip-tls-verify \
             --server="$KUBE_SERVER"
-            
-          kubectl delete deploy nginx \
+
+      - name: create nginx deployment
+        run: |
+          kubectl create deployment nginx --image=nginx --replicas=2\
             --token="$KUBE_TOKEN" \
             --insecure-skip-tls-verify \
             --server="$KUBE_SERVER"
