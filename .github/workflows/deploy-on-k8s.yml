@@ -26,29 +26,6 @@ jobs:
 
       - name: Vérifier la version de kubectl
         run: kubectl version --client
-
-      - name: Configurer kubeconfig avec token
-        run: |
-          mkdir -p $HOME/.kube
-          cat <<EOF > $HOME/.kube/config
-          apiVersion: v1
-          kind: Config
-          clusters:
-          - cluster:
-              server: $KUBE_SERVER
-              insecure-skip-tls-verify: true
-            name: my-cluster
-          contexts:
-          - context:
-              cluster: my-cluster
-              user: github
-            name: github-context
-          current-context: github-context
-          users:
-          - name: github
-            user:
-              token: $KUBE_TOKEN
-          EOF
           
       - name: Lister les nodes Kubernetes
         run: |
