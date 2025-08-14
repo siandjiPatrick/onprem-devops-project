@@ -33,7 +33,9 @@ jobs:
             --token="$KUBE_TOKEN" \
             --insecure-skip-tls-verify \
             --server="$KUBE_SERVER"
-
+            
+      - name: create nginx deployement
+        run: |
           kubectl create deployements nginx --image=nginx --replicas=3 \
             --token="$KUBE_TOKEN" \
             --insecure-skip-tls-verify \
