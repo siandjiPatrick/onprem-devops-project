@@ -1,29 +1,35 @@
-name: Deploy nginx Pod via SSH Tunnel
+name: Kubernetes Node Check
 
 on:
+  workflow_dispatch: # Permet de lancer le workflow manuellement
   push:
     branches:
       - main
 
 jobs:
-  deploy:
+  kubectl-job:
     runs-on: ubuntu-latest
 
+    env:
+      KUBE_SERVER: https://k8s.siandji.com
+      KUBE_TOKEN: ${{ secrets.KUBE_TOKEN }}
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: Vérifier l'environnement
+        run: echo "Pipeline Kubernetes démarré"
 
-      - name: Setup SSH key
+      - name: Installer kubectl
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.RSA_key }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/
 
-      - name: Start SSH tunnel
-        run: |
-          ssh -o StrictHostKeyChecking=no -N -L 6443:10.17.3.6:6443 k8s@10.17.3.6 &
-          sleep 5
+      - name: Vérifier la version de kubectl
+        run: kubectl version --client
 
-      - name: Deploy nginx pod
+      - name: Lister les nodes Kubernetes
         run: |
-          kubectl --server=https://localhost:6443 --insecure-skip-tls-verify run nginx-pod --image=nginx
+          kubectl get nodes \
+            --token="$KUBE_TOKEN" \
+            --insecure-skip-tls-verify \
+            --server="$KUBE_SERVER"
